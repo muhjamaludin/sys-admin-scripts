@@ -26,8 +26,6 @@ def monitor_resources():
     memory_usage = psutil.virtual_memory().percent
     disk_usage = psutil.disk_usage("/").percent
 
-    print(cpu_usage, memory_usage)
-
     msg += f"CPU Usage: {cpu_usage}%\n"
     msg += f"Memory Usage: {memory_usage}%\n"
     msg += f"Disk Usage: {disk_usage}%\n\n"
