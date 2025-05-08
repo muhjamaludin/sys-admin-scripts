@@ -1,12 +1,11 @@
 import psutil
 import requests
 import os
-import re
 from datetime import datetime
 from dotenv import load_dotenv
 
 # activate read from .env
-load_dotenv()
+load_dotenv(override=True)
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 CHAT_ID = os.getenv("CHAT_ID")
@@ -16,7 +15,7 @@ MEMORY_THRESHOLD = os.getenv("MEMORY_THRESHOLD") or 80
 
 
 def monitor_resources():
-    msg = f"*{TITLE}*\n\n"
+    msg = f"<b>{TITLE}</b>\n\n"
 
     # Warm-up call to set a baseline
     for proc in psutil.process_iter(["pid", "name", "username", "cpu_percent"]):
@@ -38,7 +37,7 @@ def monitor_resources():
 
     cpu_sorted = sorted(processes, key=lambda p: p["cpu_percent"] or 0.0, reverse=True)
 
-    msg += "*Top 5 CPU consuming processes:*\n"
+    msg += "<b>Top 5 CPU consuming processes:</b>\n"
     for process in cpu_sorted[:5]:
         cpu_percent = process["cpu_percent"] or 0.0
         msg += f"PID: {process['pid']}, Name: {process['name']},  CPU: {cpu_percent:.2f}%\n"
@@ -56,7 +55,7 @@ def monitor_resources():
         processes, key=lambda p: p["memory_percent"] or 0.0, reverse=True
     )
 
-    msg += "*Top 5 memory-consuming processes:*\n"
+    msg += "<b>Top 5 memory-consuming processes:</b>\n"
     for process in mem_sorted[:5]:
         mem_percent = process["memory_percent"] or 0.0
         msg += f"PID: {process['pid']}, Name: {process['name']}, Memory: {mem_percent:.2f}%\n"
@@ -67,19 +66,13 @@ def monitor_resources():
 
 
 def send_to_telegram(message):
-    message = escape_markdown(message)
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
+    payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "HTML"}
     r = requests.post(url, data=payload)
     if not r.ok:
         print(message)
         print(r.text)
     return r.ok
-
-
-def escape_markdown(text: str) -> str:
-    escape_chars = r"_*[]()~`>#+-=|{}.!"
-    return re.sub(r"([%s])" % re.escape(escape_chars), r"\\\1", text)
 
 
 if __name__ == "__main__":
