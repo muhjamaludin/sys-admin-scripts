@@ -55,7 +55,7 @@ def monitor_resources():
         processes, key=lambda p: p["memory_percent"] or 0.0, reverse=True
     )
 
-    msg += "*Top 5 memory-consuming processes:\n*"
+    msg += "*Top 5 memory-consuming processes:*\n"
     for process in mem_sorted[:5]:
         mem_percent = process["memory_percent"] or 0.0
         msg += f"PID: {process['pid']}, Name: {process['name']}, Memory: {mem_percent:.2f}%\n"
@@ -69,6 +69,8 @@ def send_to_telegram(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
     r = requests.post(url, data=payload)
+    if not r.ok:
+        print(message)
     return r.ok
 
 
