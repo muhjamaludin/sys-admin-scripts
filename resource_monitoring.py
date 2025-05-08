@@ -1,6 +1,7 @@
 import psutil
 import requests
 import os
+import re
 from datetime import datetime
 from dotenv import load_dotenv
 
@@ -66,12 +67,19 @@ def monitor_resources():
 
 
 def send_to_telegram(message):
+    message = escape_markdown(message)
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "Markdown"}
     r = requests.post(url, data=payload)
     if not r.ok:
         print(message)
+        print(r.text)
     return r.ok
+
+
+def escape_markdown(text: str) -> str:
+    escape_chars = r"_*[]()~`>#+-=|{}.!"
+    return re.sub(r"([%s])" % re.escape(escape_chars), r"\\\1", text)
 
 
 if __name__ == "__main__":
